@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.manuelduarte077.notyapp.analytics.AnalyticsTracker
 import com.manuelduarte077.notyapp.features.notes.domain.TaskLocalDataSource
 import com.manuelduarte077.notyapp.features.notes.presentation.home.HomeScreenAction.OnDeleteAllTasks
 import com.manuelduarte077.notyapp.features.notes.presentation.home.HomeScreenAction.OnDeleteTask
@@ -23,7 +24,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeScreenViewModel @Inject constructor(
-    private val taskLocalDataSource: TaskLocalDataSource
+    private val taskLocalDataSource: TaskLocalDataSource,
+    private val analyticsTracker: AnalyticsTracker,
 ) : ViewModel() {
 
     var state by mutableStateOf(HomeDataState())
@@ -34,6 +36,7 @@ class HomeScreenViewModel @Inject constructor(
     val events = eventChannel.receiveAsFlow()
 
     init {
+        analyticsTracker.logScreenView("home")
 
         state = state.copy(
             date = LocalDate.now().let {
@@ -72,17 +75,23 @@ class HomeScreenViewModel @Inject constructor(
 
                 is OnDeleteTask -> {
                     taskLocalDataSource.removeTask(action.task)
+                    analyticsTracker.logEvent("task_deleted")
                     eventChannel.send(HomeScreenEvent.DeletedTask)
                 }
 
                 is OnToggleTask -> {
                     val updatedTask = action.task.copy(isCompleted = !action.task.isCompleted)
                     taskLocalDataSource.updateTask(updatedTask)
+                    analyticsTracker.logEvent(
+                        name = "task_status_toggled",
+                        parameters = mapOf("is_completed" to updatedTask.isCompleted.toString()),
+                    )
                     eventChannel.send(HomeScreenEvent.UpdatedTask)
                 }
 
                 OnDeleteAllTasks -> {
                     taskLocalDataSource.removeAllTasks()
+                    analyticsTracker.logEvent("all_tasks_deleted")
                     eventChannel.send(HomeScreenEvent.AllTaskDeleted)
                 }
 
