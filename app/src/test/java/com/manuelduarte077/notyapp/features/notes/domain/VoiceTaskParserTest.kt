@@ -131,4 +131,16 @@ class VoiceTaskParserTest {
             parser.parse("Call my sister", now).title,
         )
     }
+
+    @Test
+    fun `parses English description and compound hour`() {
+        val result = parser.parse(
+            "Create a task call mom with description ask about the trip at 21",
+            now,
+        )
+
+        assertEquals("Call mom", result.title)
+        assertEquals("Ask about the trip", result.description)
+        assertEquals(LocalTime.of(21, 0), result.dueTime)
+    }
 }

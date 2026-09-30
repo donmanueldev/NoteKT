@@ -152,9 +152,9 @@ class VoiceTaskParser {
         "dieciocho", "eighteen" -> 18
         "diecinueve", "nineteen" -> 19
         "veinte", "twenty" -> 20
-        "veintiuno", "twenty-one" -> 21
-        "veintidós", "veintidos", "twenty-two" -> 22
-        "veintitrés", "veintitres", "twenty-three" -> 23
+        "veintiuno", "twenty-one", "twenty one" -> 21
+        "veintidós", "veintidos", "twenty-two", "twenty two" -> 22
+        "veintitrés", "veintitres", "twenty-three", "twenty three" -> 23
         else -> null
     }
 
@@ -175,10 +175,10 @@ class VoiceTaskParser {
             RegexOption.IGNORE_CASE,
         )
         val DESCRIPTION = Regex(
-            "(?:,?\\s*)(?:con\\s+)?(?:descripci[oó]n|detalles?)\\s*:?\\s*(.+?)" +
+            "(?:,?\\s*)(?:(?:con|with)\\s+)?(?:descripci[oó]n|description|detalles?|details?)\\s*:?\\s*(.+?)" +
                 "(?=,?\\s+(?:categor[ií]a\\s+|category\\s+|para\\s+|for\\s+)(?:trabajo|laboral|personal|compras?|otros?|work|shopping|other)\\b|" +
-                "hoy\\b|ma[ñn]ana\\b|today\\b|tomorrow\\b|pasado\\s+ma[ñn]ana\\b|day\\s+after\\s+tomorrow\\b|(?:el\\s+|next\\s+)?" +
-                "(?:lunes|martes|mi[eé]rcoles|jueves|viernes|s[aá]bado|domingo|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\\b|a\\s+la(?:s)?\\b|at\\b|$)",
+                "\\s+(?:hoy\\b|ma[ñn]ana\\b|today\\b|tomorrow\\b|pasado\\s+ma[ñn]ana\\b|day\\s+after\\s+tomorrow\\b|(?:el\\s+|next\\s+)?" +
+                "(?:lunes|martes|mi[eé]rcoles|jueves|viernes|s[aá]bado|domingo|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\\b|a\\s+la(?:s)?\\b|at\\b)|$)",
             setOf(RegexOption.IGNORE_CASE),
         )
         val RELATIVE_DATE = Regex(
@@ -194,7 +194,7 @@ class VoiceTaskParser {
             "\\b(?:(?:a\\s+la(?:s)?)|at)\\s+" +
                 "(\\d{1,2}|cero|zero|una|uno|one|dos|two|tres|three|cuatro|four|cinco|five|seis|six|siete|seven|ocho|eight|nueve|nine|diez|ten|once|eleven|doce|twelve|" +
                 "trece|catorce|quince|diecis[eé]is|diecisiete|dieciocho|diecinueve|veinte|veintiuno|" +
-                "veintid[oó]s|veintitr[eé]s|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|twenty-one|twenty-two|twenty-three)" +
+                "veintid[oó]s|veintitr[eé]s|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty(?:[- ](?:one|two|three))?|twenty-one|twenty-two|twenty-three)" +
                 "(?::(\\d{2}))?\\s*" +
                 "(a\\.?\\s*m\\.?|p\\.?\\s*m\\.?|de\\s+la\\s+ma[ñn]ana|de\\s+la\\s+tarde|" +
                 "de\\s+la\\s+noche)?\\s*" +

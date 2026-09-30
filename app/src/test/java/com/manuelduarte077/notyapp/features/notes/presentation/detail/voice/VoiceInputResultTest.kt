@@ -32,7 +32,7 @@ class VoiceInputResultTest {
     }
 
     @Test
-    fun `system English remains a fallback after Spanish recognition models`() {
+    fun `system English is prioritized for an English locale`() {
         assertEquals(
             listOf("en-US", "es-NI", "es-US", "es-ES", "en-GB"),
             preferredSpeechLanguageTags(Locale.forLanguageTag("en-US")),
