@@ -1,5 +1,5 @@
 [versions]
-agp = "8.13.2"
+agp = "9.4.0"
 kotlin = "2.3.21"
 coreKtx = "1.17.0"
 junit = "4.13.2"
@@ -9,7 +9,7 @@ lifecycleRuntimeKtx = "2.10.0"
 activityCompose = "1.13.0"
 composeBom = "2026.06.00"
 
-hilt = "2.58"
+hilt = "2.60.1"
 ksp = "2.3.12"
 kotlinx-serialization = "1.11.0"
 navigationCompose = "2.9.8"
@@ -66,7 +66,6 @@ room-testing = { group = "androidx.room", name = "room-testing", version.ref = "
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

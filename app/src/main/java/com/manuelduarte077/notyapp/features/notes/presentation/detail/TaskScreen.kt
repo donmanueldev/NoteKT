@@ -2,6 +2,7 @@ package com.manuelduarte077.notyapp.features.notes.presentation.detail
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.content.pm.PackageManager
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -79,6 +80,9 @@ internal fun TaskScreenRoot(
     val event = viewModel.event
 
     val context = LocalContext.current
+    val hasMicrophone = remember(context) {
+        context.packageManager.hasSystemFeature(PackageManager.FEATURE_MICROPHONE)
+    }
     var voiceCandidates by remember { mutableStateOf<List<VoiceRecognitionCandidate>>(emptyList()) }
     val voiceInput = rememberTaskVoiceInput(
         recognizerFactory = voiceRecognizerFactory,
@@ -139,6 +143,7 @@ internal fun TaskScreenRoot(
         state = state,
         voiceRecognitionState = voiceInput.state,
         voiceCandidates = voiceCandidates,
+        hasMicrophone = hasMicrophone,
         onDictateTitle = {
             voiceCandidates = emptyList()
             voiceInput.launch()
@@ -171,6 +176,7 @@ internal fun TaskScreen(
     onAction: (ActionTask) -> Unit,
     voiceRecognitionState: VoiceRecognitionState = VoiceRecognitionState.Idle,
     voiceCandidates: List<VoiceRecognitionCandidate> = emptyList(),
+    hasMicrophone: Boolean = true,
     onDictateTitle: () -> Unit = {},
     onSelectVoiceCandidate: (VoiceRecognitionCandidate) -> Unit = {},
 ) {
@@ -340,7 +346,7 @@ internal fun TaskScreen(
                         }
                     }
                 )
-                if (state.isNewTask) {
+                if (state.isNewTask && hasMicrophone) {
                     IconButton(
                         enabled = !state.isSaving,
                         onClick = onDictateTitle,

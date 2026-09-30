@@ -1,5 +1,6 @@
 package com.manuelduarte077.notyapp.features.notes.presentation.home
 
+import android.content.pm.PackageManager
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
@@ -72,6 +73,9 @@ fun HomeScreenRoot(
     val state = viewModel.state
     val event = viewModel.events
     val context = LocalContext.current
+    val hasMicrophone = remember(context) {
+        context.packageManager.hasSystemFeature(PackageManager.FEATURE_MICROPHONE)
+    }
     val lifecycleOwner = LocalLifecycleOwner.current
 
     DisposableEffect(lifecycleOwner, viewModel) {
@@ -133,6 +137,7 @@ fun HomeScreenRoot(
     }
     HomeScreen(
         state = state,
+        hasMicrophone = hasMicrophone,
         onAction = { action ->
             when (action) {
                 is HomeScreenAction.OnAddTask -> {
@@ -158,6 +163,7 @@ fun HomeScreenRoot(
 fun HomeScreen(
     modifier: Modifier = Modifier,
     state: HomeDataState,
+    hasMicrophone: Boolean = true,
     onAction: (HomeScreenAction) -> Unit
 ) {
     var isMenuExtended by remember { mutableStateOf(false) }
@@ -345,22 +351,24 @@ fun HomeScreen(
                         horizontalAlignment = Alignment.End,
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        ExtendedFloatingActionButton(
-                            text = { Text(stringResource(R.string.add_task_by_voice)) },
-                            icon = {
-                                Icon(
-                                    imageVector = Icons.Default.Mic,
-                                    contentDescription = null,
-                                )
-                            },
-                            onClick = {
-                                isTaskMenuExpanded = false
-                                onAction(HomeScreenAction.OnAddTaskByVoice)
-                            },
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                            elevation = taskMenuItemElevation(),
-                        )
+                        if (hasMicrophone) {
+                            ExtendedFloatingActionButton(
+                                text = { Text(stringResource(R.string.add_task_by_voice)) },
+                                icon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Mic,
+                                        contentDescription = null,
+                                    )
+                                },
+                                onClick = {
+                                    isTaskMenuExpanded = false
+                                    onAction(HomeScreenAction.OnAddTaskByVoice)
+                                },
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                elevation = taskMenuItemElevation(),
+                            )
+                        }
                         ExtendedFloatingActionButton(
                             text = { Text(stringResource(R.string.add_task)) },
                             icon = {

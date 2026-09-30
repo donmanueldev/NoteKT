@@ -28,6 +28,9 @@ import com.manuelduarte077.notyapp.analytics.AnalyticsTracker
 import com.manuelduarte077.notyapp.features.notes.domain.Category
 import com.manuelduarte077.notyapp.features.notes.domain.Task
 import com.manuelduarte077.notyapp.features.notes.domain.TaskLocalDataSource
+import com.manuelduarte077.notyapp.features.notes.presentation.home.HomeDataState
+import com.manuelduarte077.notyapp.features.notes.presentation.home.HomeScreen
+import com.manuelduarte077.notyapp.features.notes.presentation.home.HomeScreenAction
 import com.manuelduarte077.notyapp.features.notes.presentation.detail.voice.VoiceRecognitionCandidate
 import com.manuelduarte077.notyapp.features.notes.presentation.detail.voice.VoiceRecognitionEvent
 import com.manuelduarte077.notyapp.features.notes.presentation.detail.voice.VoiceRecognitionEventListener
@@ -260,6 +263,56 @@ class TaskVoiceInputTest {
             assertFalse(viewModel.state.isSaving)
             assertTrue(dataSource.inserted.isEmpty())
         }
+    }
+
+    @Test
+    fun taskCanStillBeCreatedWithoutMicrophone() {
+        val viewModel = createViewModel()
+        compose.setContent {
+            MaterialTheme {
+                TaskScreen(
+                    state = viewModel.state,
+                    onAction = viewModel::onAction,
+                    hasMicrophone = false,
+                )
+            }
+        }
+
+        microphone().assertDoesNotExist()
+        compose.onAllNodes(hasSetTextAction())[0].performTextReplacement("Comprar pan")
+        compose.onNodeWithText(context.getString(R.string.save)).performClick()
+        compose.runOnIdle {
+            assertEquals("Comprar pan", dataSource.inserted.single().title)
+        }
+    }
+
+    @Test
+    fun homeOffersManualTaskCreationWithoutMicrophone() {
+        var manualCreationRequests = 0
+        compose.setContent {
+            MaterialTheme {
+                HomeScreen(
+                    state = HomeDataState(),
+                    hasMicrophone = false,
+                    onAction = { action ->
+                        if (action == HomeScreenAction.OnAddTask) manualCreationRequests++
+                    },
+                )
+            }
+        }
+
+        compose.onNodeWithContentDescription(
+            context.getString(R.string.show_task_creation_options),
+        ).performClick()
+        compose.onNodeWithText(
+            context.getString(R.string.add_task_by_voice),
+            useUnmergedTree = true,
+        ).assertDoesNotExist()
+        compose.onNodeWithText(
+            context.getString(R.string.add_task),
+            useUnmergedTree = true,
+        ).performClick()
+        compose.runOnIdle { assertEquals(1, manualCreationRequests) }
     }
 
     @Test

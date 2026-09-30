@@ -179,6 +179,8 @@ internal fun rememberTaskVoiceInput(
         launch = {
             if (state !is VoiceRecognitionState.Idle) {
                 cancelRecognition(notify = true)
+            } else if (!context.packageManager.hasSystemFeature(PackageManager.FEATURE_MICROPHONE)) {
+                currentOnResult(VoiceInputResult.Unavailable)
             } else if (
                 ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) ==
                 PackageManager.PERMISSION_GRANTED
