@@ -194,7 +194,7 @@ class VoiceTaskParser {
             "\\b(?:(?:a\\s+la(?:s)?)|at)\\s+" +
                 "(\\d{1,2}|cero|zero|una|uno|one|dos|two|tres|three|cuatro|four|cinco|five|seis|six|siete|seven|ocho|eight|nueve|nine|diez|ten|once|eleven|doce|twelve|" +
                 "trece|catorce|quince|diecis[eé]is|diecisiete|dieciocho|diecinueve|veinte|veintiuno|" +
-                "veintid[oó]s|veintitr[eé]s|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty(?:[- ](?:one|two|three))?|twenty-one|twenty-two|twenty-three)" +
+                "veintid[oó]s|veintitr[eé]s|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty(?:[- ](?:one|two|three))?)" +
                 "(?::(\\d{2}))?\\s*" +
                 "(a\\.?\\s*m\\.?|p\\.?\\s*m\\.?|de\\s+la\\s+ma[ñn]ana|de\\s+la\\s+tarde|" +
                 "de\\s+la\\s+noche)?\\s*" +

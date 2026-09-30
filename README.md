@@ -95,6 +95,9 @@ app/
 
 Toca el micrófono junto a «+» en Inicio para abrir una tarea nueva y comenzar el dictado.
 El texto reconocido aparece como título: puedes corregirlo, añadir descripción o categoría
+en español o inglés. En Android 14 o posterior el reconocimiento puede cambiar de idioma
+durante el dictado; en versiones anteriores se usa el idioma de reconocimiento configurado
+en el dispositivo.
 y tocar **Guardar**. El micrófono junto al título permite repetir el dictado y reemplazarlo.
 Cancelar o salir sin guardar no crea una tarea.
 
