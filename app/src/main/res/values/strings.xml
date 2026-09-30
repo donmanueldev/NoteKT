@@ -3,6 +3,9 @@
     <string name="completed_tasks">Completed</string>
     <string name="pending_tasks">Pending</string>
     <string name="delete_all">Delete all</string>
+    <string name="delete_all_confirmation_title">Delete all tasks?</string>
+    <string name="delete_all_confirmation_message">This will permanently delete every task and cannot be undone.</string>
+    <string name="cancel">Cancel</string>
     <string name="task_deleted">Task deleted</string>
     <string name="all_task_deleted">All tasked deleted</string>
     <string name="task_updated">Task updated</string>
@@ -16,4 +19,25 @@
     <string name="task_created">Task saved</string>
     <string name="no_tasks">No task has been created.</string>
     <string name="error_creating_task">Task not saved</string>
+    <string name="add_task">Add task</string>
+    <string name="add_task_by_voice">Add task by voice</string>
+    <string name="show_task_creation_options">Show task creation options</string>
+    <string name="hide_task_creation_options">Hide task creation options</string>
+    <string name="dictate_task_title">Dictate task title</string>
+    <string name="voice_input_prompt">Say your task</string>
+    <string name="voice_input_empty">No speech recognized. Try again or type your task.</string>
+    <string name="voice_input_unavailable">Voice input is unavailable on this device. Type your task instead.</string>
+    <string name="voice_input_failed">Voice input failed. Try again or type your task.</string>
+    <string name="voice_input_permission_denied">Microphone permission is required for voice input.</string>
+    <string name="voice_input_language_unavailable">Speech recognition is unavailable for the device language.</string>
+    <string name="voice_input_model_downloading">The speech model is downloading. Try again when it finishes.</string>
+    <string name="voice_input_listening">Listening…</string>
+    <string name="voice_input_processing">Processing speech…</string>
+    <string name="stop_voice_input">Stop voice input</string>
+    <string name="voice_input_alternatives">Review %1$d alternatives</string>
+    <string name="voice_input_choose_result">Choose what you said</string>
+    <string name="add_due_date">Add due date</string>
+    <string name="add_due_time">Add time</string>
+    <string name="clear_due_date">Clear</string>
+    <string name="task_due">Due %1$s</string>
 </resources>

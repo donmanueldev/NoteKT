@@ -1,5 +1,8 @@
 package com.manuelduarte077.notyapp.features.notes.presentation.detail
 
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
+import android.content.pm.PackageManager
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -21,14 +24,20 @@ import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -49,17 +58,66 @@ import androidx.compose.ui.unit.dp
 import com.manuelduarte077.notyapp.features.notes.presentation.detail.providers.TaskScreenStatePreviewProvider
 import com.manuelduarte077.notyapp.R
 import com.manuelduarte077.notyapp.features.notes.domain.Category
+import com.manuelduarte077.notyapp.features.notes.presentation.detail.voice.AndroidVoiceRecognizerFactory
+import com.manuelduarte077.notyapp.features.notes.presentation.detail.voice.VoiceRecognitionCandidate
+import com.manuelduarte077.notyapp.features.notes.presentation.detail.voice.VoiceRecognitionState
+import com.manuelduarte077.notyapp.features.notes.presentation.detail.voice.VoiceRecognizerFactory
+import com.manuelduarte077.notyapp.features.notes.presentation.detail.voice.VoiceInputResult
+import com.manuelduarte077.notyapp.features.notes.presentation.detail.voice.rememberTaskVoiceInput
 import com.manuelduarte077.notyapp.ui.theme.NoteTheme
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 @Composable
-fun TaskScreenRoot(
+internal fun TaskScreenRoot(
     navigateBack: () -> Boolean,
-    viewModel: TaskViewModel
+    viewModel: TaskViewModel,
+    voiceRecognizerFactory: VoiceRecognizerFactory = AndroidVoiceRecognizerFactory,
 ) {
     val state = viewModel.state
     val event = viewModel.event
 
     val context = LocalContext.current
+    val hasMicrophone = remember(context) {
+        context.packageManager.hasSystemFeature(PackageManager.FEATURE_MICROPHONE)
+    }
+    var voiceCandidates by remember { mutableStateOf<List<VoiceRecognitionCandidate>>(emptyList()) }
+    val voiceInput = rememberTaskVoiceInput(
+        recognizerFactory = voiceRecognizerFactory,
+    ) { result ->
+        when (result) {
+            is VoiceInputResult.Recognized -> {
+                voiceCandidates = result.candidates
+                result.candidates.firstOrNull()?.let { candidate ->
+                    viewModel.onAction(
+                        ActionTask.ApplyDictatedTitle(candidate.text),
+                    )
+                }
+            }
+            VoiceInputResult.Cancelled -> voiceCandidates = emptyList()
+            else -> {
+                voiceCandidates = emptyList()
+                val message = when (result) {
+                    VoiceInputResult.Empty -> R.string.voice_input_empty
+                    VoiceInputResult.Unavailable -> R.string.voice_input_unavailable
+                    VoiceInputResult.PermissionDenied -> R.string.voice_input_permission_denied
+                    VoiceInputResult.LanguageUnavailable -> R.string.voice_input_language_unavailable
+                    VoiceInputResult.ModelDownloadRequired -> R.string.voice_input_model_downloading
+                    else -> R.string.voice_input_failed
+                }
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    LaunchedEffect(viewModel) {
+        if (viewModel.consumeInitialVoiceInput()) {
+            voiceCandidates = emptyList()
+            voiceInput.launch()
+        }
+    }
 
     LaunchedEffect(true) {
         event.collect { event ->
@@ -67,18 +125,35 @@ fun TaskScreenRoot(
                 is TaskEvent.TaskCreated -> {
                     Toast.makeText(
                         context,
-                        context.getString(R.string.task_created),
+                        R.string.task_created,
                         Toast.LENGTH_SHORT
                     ).show()
                     navigateBack()
                 }
-
+                TaskEvent.SaveFailed -> Toast.makeText(
+                    context,
+                    R.string.error_creating_task,
+                    Toast.LENGTH_SHORT,
+                ).show()
             }
         }
     }
 
     TaskScreen(
         state = state,
+        voiceRecognitionState = voiceInput.state,
+        voiceCandidates = voiceCandidates,
+        hasMicrophone = hasMicrophone,
+        onDictateTitle = {
+            voiceCandidates = emptyList()
+            voiceInput.launch()
+        },
+        onSelectVoiceCandidate = { candidate ->
+            voiceCandidates = emptyList()
+            viewModel.onAction(
+                ActionTask.ApplyDictatedTitle(candidate.text),
+            )
+        },
         onAction = { action ->
             when (action) {
                 is ActionTask.Back -> {
@@ -86,6 +161,7 @@ fun TaskScreenRoot(
                 }
 
                 else -> {
+                    voiceCandidates = emptyList()
                     viewModel.onAction(action)
                 }
             }
@@ -95,9 +171,14 @@ fun TaskScreenRoot(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TaskScreen(
+internal fun TaskScreen(
     state: TaskScreenState,
-    onAction: (ActionTask) -> Unit
+    onAction: (ActionTask) -> Unit,
+    voiceRecognitionState: VoiceRecognitionState = VoiceRecognitionState.Idle,
+    voiceCandidates: List<VoiceRecognitionCandidate> = emptyList(),
+    hasMicrophone: Boolean = true,
+    onDictateTitle: () -> Unit = {},
+    onSelectVoiceCandidate: (VoiceRecognitionCandidate) -> Unit = {},
 ) {
 
     var isDescriptionFocus by remember {
@@ -106,6 +187,9 @@ fun TaskScreen(
     var isExpanded by remember {
         mutableStateOf(false)
     }
+    var showVoiceAlternatives by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val isVoiceInputInProgress = voiceRecognitionState !is VoiceRecognitionState.Idle
 
     Scaffold(
         topBar = {
@@ -232,38 +316,90 @@ fun TaskScreen(
 
             }
 
-            BasicTextField(
-                state = state.taskName,
-                textStyle = MaterialTheme.typography.headlineLarge.copy(
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.Bold
-                ),
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.secondary),
-                lineLimits = TextFieldLineLimits.SingleLine,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight(),
-                decorator = { innerTextField ->
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        if (state.taskName.text.toString().isEmpty()) {
-                            Text(
-                                modifier = Modifier.fillMaxWidth(),
-                                text = stringResource(R.string.task_name),
-                                color = MaterialTheme.colorScheme.onSurface.copy(
-                                    alpha = 0.5f
-                                ),
-                                style = MaterialTheme.typography.headlineLarge.copy(
-                                    fontWeight = FontWeight.Bold
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                BasicTextField(
+                    state = state.taskName,
+                    textStyle = MaterialTheme.typography.headlineLarge.copy(
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.secondary),
+                    lineLimits = TextFieldLineLimits.SingleLine,
+                    modifier = Modifier
+                        .weight(1f)
+                        .wrapContentHeight(),
+                    decorator = { innerTextField ->
+                        Box(modifier = Modifier.fillMaxWidth()) {
+                            if (state.taskName.text.toString().isEmpty()) {
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = stringResource(R.string.task_name),
+                                    color = MaterialTheme.colorScheme.onSurface.copy(
+                                        alpha = 0.5f
+                                    ),
+                                    style = MaterialTheme.typography.headlineLarge.copy(
+                                        fontWeight = FontWeight.Bold
+                                    )
                                 )
-                            )
-                        } else {
+                            }
                             innerTextField()
                         }
                     }
+                )
+                if (state.isNewTask && hasMicrophone) {
+                    IconButton(
+                        enabled = !state.isSaving,
+                        onClick = onDictateTitle,
+                    ) {
+                        Icon(
+                            imageVector = if (isVoiceInputInProgress) Icons.Default.Stop else Icons.Default.Mic,
+                            contentDescription = stringResource(
+                                if (isVoiceInputInProgress) {
+                                    R.string.stop_voice_input
+                                } else {
+                                    R.string.dictate_task_title
+                                },
+                            ),
+                        )
+                    }
                 }
-            )
+            }
+            when (voiceRecognitionState) {
+                is VoiceRecognitionState.Listening -> {
+                    val audioLevel = voiceRecognitionState.rmsDb
+                        ?.let { ((it + 2f) / 12f).coerceIn(0f, 1f) }
+                    if (audioLevel == null) {
+                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                    } else {
+                        LinearProgressIndicator(
+                            progress = { audioLevel },
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                    Text(
+                        text = voiceRecognitionState.partialText.ifBlank {
+                            stringResource(R.string.voice_input_listening)
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+
+                is VoiceRecognitionState.Processing -> Text(
+                    text = voiceRecognitionState.partialText.ifBlank {
+                        stringResource(R.string.voice_input_processing)
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+
+                VoiceRecognitionState.Idle -> Unit
+            }
+            if (voiceCandidates.size > 1) {
+                TextButton(onClick = { showVoiceAlternatives = true }) {
+                    Text(stringResource(R.string.voice_input_alternatives, voiceCandidates.size))
+                }
+            }
             BasicTextField(
                 state = state.taskDescription,
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.secondary),
@@ -284,7 +420,7 @@ fun TaskScreen(
                         isDescriptionFocus = it.isFocused
                     },
                 decorator = { innerTextField ->
-                    Column {
+                    Box(modifier = Modifier.fillMaxWidth()) {
                         if (state.taskDescription.text.toString()
                                 .isEmpty() && !isDescriptionFocus
                         ) {
@@ -294,12 +430,74 @@ fun TaskScreen(
                                     alpha = 0.5f
                                 )
                             )
-                        } else {
-                            innerTextField()
                         }
+                        innerTextField()
                     }
                 },
             )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                TextButton(
+                    onClick = {
+                        val initialDate = state.dueDate ?: LocalDate.now()
+                        DatePickerDialog(
+                            context,
+                            { _, year, month, day ->
+                                onAction(
+                                    ActionTask.ChangeTaskDueDate(
+                                        LocalDate.of(year, month + 1, day),
+                                    ),
+                                )
+                            },
+                            initialDate.year,
+                            initialDate.monthValue - 1,
+                            initialDate.dayOfMonth,
+                        ).show()
+                    },
+                ) {
+                    Text(
+                        state.dueDate?.format(
+                            DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM),
+                        ) ?: stringResource(R.string.add_due_date),
+                    )
+                }
+                TextButton(
+                    onClick = {
+                        val initialTime = state.dueTime ?: LocalTime.now()
+                        TimePickerDialog(
+                            context,
+                            { _, hour, minute ->
+                                if (state.dueDate == null) {
+                                    onAction(ActionTask.ChangeTaskDueDate(LocalDate.now()))
+                                }
+                                onAction(ActionTask.ChangeTaskDueTime(LocalTime.of(hour, minute)))
+                            },
+                            initialTime.hour,
+                            initialTime.minute,
+                            false,
+                        ).show()
+                    },
+                ) {
+                    Text(
+                        state.dueTime?.format(
+                            DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT),
+                        ) ?: stringResource(R.string.add_due_time),
+                    )
+                }
+                if (state.dueDate != null || state.dueTime != null) {
+                    TextButton(
+                        onClick = {
+                            onAction(ActionTask.ChangeTaskDueDate(null))
+                            onAction(ActionTask.ChangeTaskDueTime(null))
+                        },
+                    ) {
+                        Text(stringResource(R.string.clear_due_date))
+                    }
+                }
+            }
 
             Spacer(
                 modifier = Modifier.weight(1f)
@@ -327,6 +525,36 @@ fun TaskScreen(
                 )
             }
         }
+    }
+
+    if (showVoiceAlternatives) {
+        AlertDialog(
+            onDismissRequest = { showVoiceAlternatives = false },
+            title = { Text(stringResource(R.string.voice_input_choose_result)) },
+            text = {
+                Column {
+                    voiceCandidates.forEach { candidate ->
+                        TextButton(
+                            modifier = Modifier.fillMaxWidth(),
+                            onClick = {
+                                showVoiceAlternatives = false
+                                onSelectVoiceCandidate(candidate)
+                            },
+                        ) {
+                            val confidence = candidate.confidence?.let {
+                                " (${(it * 100).toInt()}%)"
+                            }.orEmpty()
+                            Text(candidate.text + confidence)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showVoiceAlternatives = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            },
+        )
     }
 }
 
