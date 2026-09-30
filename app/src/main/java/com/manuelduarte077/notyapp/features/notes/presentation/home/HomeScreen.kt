@@ -1,11 +1,19 @@
 package com.manuelduarte077.notyapp.features.notes.presentation.home
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,16 +21,20 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -30,8 +42,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -47,7 +62,7 @@ import com.manuelduarte077.notyapp.ui.theme.NoteTheme
 
 @Composable
 fun HomeScreenRoot(
-    navigateToTaskScreen: (String?) -> Unit,
+    navigateToTaskScreen: (String?, Boolean) -> Unit,
     viewModel: HomeScreenViewModel
 ) {
     val state = viewModel.state
@@ -62,7 +77,7 @@ fun HomeScreenRoot(
                 HomeScreenEvent.DeletedTask -> {
                     Toast.makeText(
                         context,
-                        context.getString(R.string.task_deleted),
+                        R.string.task_deleted,
                         Toast.LENGTH_SHORT
                     ).show()
                 }
@@ -70,7 +85,7 @@ fun HomeScreenRoot(
                 HomeScreenEvent.AllTaskDeleted -> {
                     Toast.makeText(
                         context,
-                        context.getString(R.string.all_task_deleted),
+                        R.string.all_task_deleted,
                         Toast.LENGTH_SHORT
                     ).show()
                 }
@@ -78,7 +93,7 @@ fun HomeScreenRoot(
                 HomeScreenEvent.UpdatedTask -> {
                     Toast.makeText(
                         context,
-                        context.getString(R.string.task_updated),
+                        R.string.task_updated,
                         Toast.LENGTH_SHORT
                     ).show()
                 }
@@ -90,11 +105,15 @@ fun HomeScreenRoot(
         onAction = { action ->
             when (action) {
                 is HomeScreenAction.OnAddTask -> {
-                    navigateToTaskScreen(null)
+                    navigateToTaskScreen(null, false)
+                }
+
+                is HomeScreenAction.OnAddTaskByVoice -> {
+                    navigateToTaskScreen(null, true)
                 }
 
                 is HomeScreenAction.OnClickTask -> {
-                    navigateToTaskScreen(action.taskId)
+                    navigateToTaskScreen(action.taskId, false)
                 }
 
                 else -> viewModel.onAction(action)
@@ -111,6 +130,20 @@ fun HomeScreen(
     onAction: (HomeScreenAction) -> Unit
 ) {
     var isMenuExtended by remember { mutableStateOf(false) }
+    var showDeleteAllConfirmation by remember { mutableStateOf(false) }
+    var isTaskMenuExpanded by rememberSaveable { mutableStateOf(false) }
+    val taskMenuIconRotation by animateFloatAsState(
+        targetValue = if (isTaskMenuExpanded) 45f else 0f,
+        animationSpec = tween(
+            durationMillis = 160,
+            easing = FastOutSlowInEasing,
+        ),
+        label = "task menu icon rotation",
+    )
+
+    BackHandler(enabled = isTaskMenuExpanded) {
+        isTaskMenuExpanded = false
+    }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -152,7 +185,7 @@ fun HomeScreen(
                                 },
                                 onClick = {
                                     isMenuExtended = false
-                                    onAction(HomeScreenAction.OnDeleteAllTasks)
+                                    showDeleteAllConfirmation = true
                                 }
                             )
                         }
@@ -264,21 +297,110 @@ fun HomeScreen(
             }
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    onAction(HomeScreenAction.OnAddTask)
-                },
-                elevation = FloatingActionButtonDefaults.elevation(
-                    defaultElevation = 8.dp,
-                    pressedElevation = 12.dp
-                ),
-
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Add Task")
+                AnimatedVisibility(
+                    visible = isTaskMenuExpanded,
+                    enter = fadeIn(
+                        animationSpec = tween(durationMillis = 100),
+                    ),
+                    exit = fadeOut(
+                        animationSpec = tween(durationMillis = 75),
+                    ),
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.End,
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        ExtendedFloatingActionButton(
+                            text = { Text(stringResource(R.string.add_task_by_voice)) },
+                            icon = {
+                                Icon(
+                                    imageVector = Icons.Default.Mic,
+                                    contentDescription = null,
+                                )
+                            },
+                            onClick = {
+                                isTaskMenuExpanded = false
+                                onAction(HomeScreenAction.OnAddTaskByVoice)
+                            },
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            elevation = taskMenuItemElevation(),
+                        )
+                        ExtendedFloatingActionButton(
+                            text = { Text(stringResource(R.string.add_task)) },
+                            icon = {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = null,
+                                )
+                            },
+                            onClick = {
+                                isTaskMenuExpanded = false
+                                onAction(HomeScreenAction.OnAddTask)
+                            },
+                            elevation = taskMenuItemElevation(),
+                        )
+                    }
+                }
+                FloatingActionButton(
+                    onClick = { isTaskMenuExpanded = !isTaskMenuExpanded },
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        modifier = Modifier.graphicsLayer {
+                            rotationZ = taskMenuIconRotation
+                        },
+                        contentDescription = stringResource(
+                            if (isTaskMenuExpanded) {
+                                R.string.hide_task_creation_options
+                            } else {
+                                R.string.show_task_creation_options
+                            },
+                        ),
+                    )
+                }
             }
         }
     )
+
+    if (showDeleteAllConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showDeleteAllConfirmation = false },
+            title = { Text(stringResource(R.string.delete_all_confirmation_title)) },
+            text = { Text(stringResource(R.string.delete_all_confirmation_message)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteAllConfirmation = false
+                        onAction(HomeScreenAction.OnDeleteAllTasks)
+                    }
+                ) {
+                    Text(
+                        text = stringResource(R.string.delete_all),
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteAllConfirmation = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            },
+        )
+    }
 }
+
+@Composable
+private fun taskMenuItemElevation() = FloatingActionButtonDefaults.elevation(
+    defaultElevation = 0.dp,
+    pressedElevation = 0.dp,
+    focusedElevation = 0.dp,
+    hoveredElevation = 0.dp,
+)
 
 @Preview
 @Composable

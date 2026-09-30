@@ -4,6 +4,9 @@
     <string name="completed_tasks">Completadas</string>
     <string name="pending_tasks">Pendientes</string>
     <string name="delete_all">Eliminar todo</string>
+    <string name="delete_all_confirmation_title">¿Eliminar todas las tareas?</string>
+    <string name="delete_all_confirmation_message">Se eliminarán todas las tareas. Esta acción no se puede deshacer.</string>
+    <string name="cancel">Cancelar</string>
     <string name="task_deleted">Tarea eliminada</string>
     <string name="all_task_deleted">Todas las tareas eliminadas</string>
     <string name="task_updated">Tarea actualizada</string>
@@ -17,4 +20,25 @@
     <string name="task_created">Tarea guardada</string>
     <string name="no_tasks">No se ha creado ninguna tarea.</string>
     <string name="error_creating_task">No se guardó la tarea</string>
+    <string name="add_task">Agregar tarea</string>
+    <string name="add_task_by_voice">Agregar tarea por voz</string>
+    <string name="show_task_creation_options">Mostrar opciones para agregar tareas</string>
+    <string name="hide_task_creation_options">Ocultar opciones para agregar tareas</string>
+    <string name="dictate_task_title">Dictar título de la tarea</string>
+    <string name="voice_input_prompt">Decí tu tarea</string>
+    <string name="voice_input_empty">No se reconoció ninguna frase. Intentá de nuevo o escribí tu tarea.</string>
+    <string name="voice_input_unavailable">El dictado no está disponible en este dispositivo. Escribí tu tarea.</string>
+    <string name="voice_input_failed">Falló el dictado. Intentá de nuevo o escribí tu tarea.</string>
+    <string name="voice_input_permission_denied">Se necesita permiso para usar el micrófono.</string>
+    <string name="voice_input_language_unavailable">El reconocimiento de español no está disponible en este dispositivo.</string>
+    <string name="voice_input_model_downloading">Se está descargando el modelo de español. Intentá de nuevo cuando termine.</string>
+    <string name="voice_input_listening">Escuchando…</string>
+    <string name="voice_input_processing">Procesando lo que dijiste…</string>
+    <string name="stop_voice_input">Detener dictado</string>
+    <string name="voice_input_alternatives">Revisar %1$d alternativas</string>
+    <string name="voice_input_choose_result">Elegí lo que dijiste</string>
+    <string name="add_due_date">Agregar fecha</string>
+    <string name="add_due_time">Agregar hora</string>
+    <string name="clear_due_date">Quitar</string>
+    <string name="task_due">Vence %1$s</string>
 </resources>

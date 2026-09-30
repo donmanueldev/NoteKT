@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -29,10 +29,11 @@ fun NavigationRoot(navController: NavHostController) {
 
                 HomeScreenRoot(
                     viewModel = homeScreenViewModel,
-                    navigateToTaskScreen = { taskId ->
+                    navigateToTaskScreen = { taskId, startVoiceInput ->
                         navController.navigate(
                             TaskScreenDes(
-                                taskId = taskId
+                                taskId = taskId,
+                                startVoiceInput = startVoiceInput,
                             )
                         )
                     }
@@ -56,7 +57,10 @@ fun NavigationRoot(navController: NavHostController) {
 object HomeScreenDes
 
 @Serializable
-data class TaskScreenDes(val taskId: String? = null)
+data class TaskScreenDes(
+    val taskId: String? = null,
+    val startVoiceInput: Boolean = false,
+)
 
 // SignIn Screen
 @Serializable

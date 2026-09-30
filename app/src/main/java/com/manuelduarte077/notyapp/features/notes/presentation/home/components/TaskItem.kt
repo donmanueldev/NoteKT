@@ -22,9 +22,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.manuelduarte077.notyapp.R
 import com.manuelduarte077.notyapp.features.notes.domain.Task
 import com.manuelduarte077.notyapp.features.notes.presentation.home.providers.TaskItemPreviewProvider
 import com.manuelduarte077.notyapp.ui.theme.NoteTheme
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 @Composable
 fun TaskItem(
@@ -91,6 +95,19 @@ fun TaskItem(
                         text = it.toString(),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                task.dueDate?.let { dueDate ->
+                    val formattedDate = dueDate.format(
+                        DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM),
+                    )
+                    val formattedTime = task.dueTime?.let {
+                        " · ${it.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))}"
+                    }.orEmpty()
+                    Text(
+                        text = stringResource(R.string.task_due, formattedDate + formattedTime),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary,
                     )
                 }
             }
