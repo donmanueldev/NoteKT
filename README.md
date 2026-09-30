@@ -111,6 +111,8 @@ El audio lo procesa el servicio de reconocimiento instalado y, según el disposi
 enviarse a sus servidores; NoteKT no almacena el audio. El texto final se interpreta de forma
 local para extraer título, descripción explícita, categoría, fecha y hora de vencimiento. El
 usuario puede revisar y corregir todos esos campos antes de guardar la tarea.
+El reconocedor no recibe una lista fija de palabras: captura dictado libre para no favorecer
+un idioma o un conjunto cerrado de frases.
 
 ## Modelos de datos
 

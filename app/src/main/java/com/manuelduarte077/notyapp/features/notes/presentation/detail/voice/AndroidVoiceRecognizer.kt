@@ -228,10 +228,6 @@ internal class AndroidVoiceRecognizer(
         putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
         putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, MAX_VOICE_RESULTS)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            putStringArrayListExtra(
-                RecognizerIntent.EXTRA_BIASING_STRINGS,
-                ArrayList(request.biasingStrings),
-            )
             putExtra(
                 RecognizerIntent.EXTRA_ENABLE_FORMATTING,
                 RecognizerIntent.FORMATTING_OPTIMIZE_QUALITY,

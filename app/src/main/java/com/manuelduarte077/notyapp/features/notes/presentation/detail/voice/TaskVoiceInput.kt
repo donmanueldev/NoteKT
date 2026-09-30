@@ -63,18 +63,6 @@ internal fun rememberTaskVoiceInput(
                 preferredLanguageTags = preferredSpeechLanguageTags(
                     configuration.locales[0],
                 ),
-                biasingStrings = listOf(
-                    "trabajo",
-                    "personal",
-                    "compras",
-                    "otros",
-                    "hoy",
-                    "mañana",
-                    "work",
-                    "shopping",
-                    "today",
-                    "tomorrow",
-                ),
                 enableLanguageSwitch = true,
             ),
         ) { event ->

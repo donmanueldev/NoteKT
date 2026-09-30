@@ -4,7 +4,6 @@ import android.content.Context
 
 internal data class VoiceRecognitionRequest(
     val preferredLanguageTags: List<String>,
-    val biasingStrings: List<String>,
     val enableLanguageSwitch: Boolean = false,
 )
 
