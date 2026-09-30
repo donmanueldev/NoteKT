@@ -1,0 +1,55 @@
+<resources>
+    <string-array name="voice_leading_commands">
+        <item>recuérdame</item><item>recordame</item><item>recuérdame que</item><item>crear tarea</item><item>agregar tarea</item><item>agrega una tarea</item>
+        <item>remind me</item><item>remind me to</item><item>remember</item><item>remember to</item>
+        <item>crea una tarea</item><item>crear una tarea</item><item>create task</item><item>create a task</item><item>add task</item><item>add a task</item>
+        <item>anota</item><item>anotar</item><item>note</item><item>note that</item>
+    </string-array>
+    <string-array name="voice_description_labels">
+        <item>con descripción</item><item>descripción</item><item>detalles</item>
+        <item>with description</item><item>description</item><item>details</item>
+    </string-array>
+    <string-array name="voice_category_work"><item>categoría trabajo</item><item>categoría laboral</item><item>para trabajo</item><item>para laboral</item><item>category work</item><item>for work</item></string-array>
+    <string-array name="voice_category_personal"><item>categoría personal</item><item>para personal</item><item>category personal</item><item>for personal</item></string-array>
+    <string-array name="voice_category_shopping"><item>categoría compra</item><item>categoría compras</item><item>para compra</item><item>para compras</item><item>category shopping</item><item>for shopping</item></string-array>
+    <string-array name="voice_category_other"><item>categoría otro</item><item>categoría otros</item><item>para otro</item><item>para otros</item><item>category other</item><item>for other</item></string-array>
+    <string-array name="voice_date_today"><item>hoy</item><item>today</item></string-array>
+    <string-array name="voice_date_tomorrow"><item>mañana</item><item>manana</item><item>tomorrow</item></string-array>
+    <string-array name="voice_date_after_tomorrow"><item>pasado mañana</item><item>day after tomorrow</item></string-array>
+    <string-array name="voice_weekday_monday"><item>lunes</item><item>el lunes</item><item>próximo lunes</item><item>monday</item><item>next monday</item></string-array>
+    <string-array name="voice_weekday_tuesday"><item>martes</item><item>el martes</item><item>próximo martes</item><item>tuesday</item><item>next tuesday</item></string-array>
+    <string-array name="voice_weekday_wednesday"><item>miércoles</item><item>miercoles</item><item>el miércoles</item><item>wednesday</item><item>next wednesday</item></string-array>
+    <string-array name="voice_weekday_thursday"><item>jueves</item><item>el jueves</item><item>próximo jueves</item><item>thursday</item><item>next thursday</item></string-array>
+    <string-array name="voice_weekday_friday"><item>viernes</item><item>el viernes</item><item>próximo viernes</item><item>friday</item><item>next friday</item></string-array>
+    <string-array name="voice_weekday_saturday"><item>sábado</item><item>sabado</item><item>el sábado</item><item>saturday</item><item>next saturday</item></string-array>
+    <string-array name="voice_weekday_sunday"><item>domingo</item><item>el domingo</item><item>próximo domingo</item><item>sunday</item><item>next sunday</item></string-array>
+    <string-array name="voice_time_prefixes"><item>a la</item><item>a las</item><item>at</item></string-array>
+    <string-array name="voice_morning_markers"><item>a. m.</item><item>am</item><item>de la mañana</item><item>in the morning</item></string-array>
+    <string-array name="voice_afternoon_markers"><item>p. m.</item><item>pm</item><item>de la tarde</item><item>de la noche</item><item>in the afternoon</item><item>in the evening</item><item>at night</item></string-array>
+    <string-array name="voice_fraction_half"><item>y media</item><item>half past</item></string-array>
+    <string-array name="voice_fraction_quarter"><item>y cuarto</item><item>quarter past</item></string-array>
+    <string-array name="voice_hour_zero"><item>cero</item><item>zero</item></string-array>
+    <string-array name="voice_hour_one"><item>una</item><item>uno</item><item>one</item></string-array>
+    <string-array name="voice_hour_two"><item>dos</item><item>two</item></string-array>
+    <string-array name="voice_hour_three"><item>tres</item><item>three</item></string-array>
+    <string-array name="voice_hour_four"><item>cuatro</item><item>four</item></string-array>
+    <string-array name="voice_hour_five"><item>cinco</item><item>five</item></string-array>
+    <string-array name="voice_hour_six"><item>seis</item><item>six</item></string-array>
+    <string-array name="voice_hour_seven"><item>siete</item><item>seven</item></string-array>
+    <string-array name="voice_hour_eight"><item>ocho</item><item>eight</item></string-array>
+    <string-array name="voice_hour_nine"><item>nueve</item><item>nine</item></string-array>
+    <string-array name="voice_hour_ten"><item>diez</item><item>ten</item></string-array>
+    <string-array name="voice_hour_eleven"><item>once</item><item>eleven</item></string-array>
+    <string-array name="voice_hour_twelve"><item>doce</item><item>twelve</item></string-array>
+    <string-array name="voice_hour_thirteen"><item>trece</item><item>thirteen</item></string-array>
+    <string-array name="voice_hour_fourteen"><item>catorce</item><item>fourteen</item></string-array>
+    <string-array name="voice_hour_fifteen"><item>quince</item><item>fifteen</item></string-array>
+    <string-array name="voice_hour_sixteen"><item>dieciséis</item><item>dieciseis</item><item>sixteen</item></string-array>
+    <string-array name="voice_hour_seventeen"><item>diecisiete</item><item>seventeen</item></string-array>
+    <string-array name="voice_hour_eighteen"><item>dieciocho</item><item>eighteen</item></string-array>
+    <string-array name="voice_hour_nineteen"><item>diecinueve</item><item>nineteen</item></string-array>
+    <string-array name="voice_hour_twenty"><item>veinte</item><item>twenty</item></string-array>
+    <string-array name="voice_hour_twenty_one"><item>veintiuno</item><item>twenty-one</item><item>twenty one</item></string-array>
+    <string-array name="voice_hour_twenty_two"><item>veintidós</item><item>veintidos</item><item>twenty-two</item><item>twenty two</item></string-array>
+    <string-array name="voice_hour_twenty_three"><item>veintitrés</item><item>veintitres</item><item>twenty-three</item><item>twenty three</item></string-array>
+</resources>

@@ -80,7 +80,9 @@ internal fun TaskScreenRoot(
     val event = viewModel.event
 
     val context = LocalContext.current
-    val voiceTaskParser = remember { VoiceTaskParser() }
+    val voiceTaskParser = remember(context.resources) {
+        VoiceTaskParser(loadVoiceTaskLexicon(context.resources))
+    }
     var voiceCandidates by remember { mutableStateOf<List<VoiceRecognitionCandidate>>(emptyList()) }
     val voiceInput = rememberTaskVoiceInput(
         recognizerFactory = voiceRecognizerFactory,
