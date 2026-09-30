@@ -89,11 +89,10 @@ internal class AndroidVoiceRecognizer(
             object : RecognitionSupportCallback {
                 override fun onSupportResult(recognitionSupport: RecognitionSupport) {
                     if (!isCurrentSession(session.id)) return
-                    val readyLanguages = recognitionSupport.installedOnDeviceLanguages +
-                        recognitionSupport.onlineLanguages
-                    val selected = selectSupportedLanguage(
+                    val selected = selectRecognitionLanguage(
                         session.preferredLanguageTags,
-                        readyLanguages,
+                        installedLanguageTags = recognitionSupport.installedOnDeviceLanguages,
+                        onlineLanguageTags = recognitionSupport.onlineLanguages,
                     )
                     if (selected != null) {
                         startLanguage(recognizer, session, selected)
@@ -330,6 +329,18 @@ internal fun selectSupportedLanguage(
         }
     }
 }
+
+internal fun selectRecognitionLanguage(
+    preferredLanguageTags: List<String>,
+    installedLanguageTags: List<String>,
+    onlineLanguageTags: List<String>,
+): String? = selectSupportedLanguage(
+    preferredLanguageTags = preferredLanguageTags,
+    supportedLanguageTags = installedLanguageTags,
+) ?: selectSupportedLanguage(
+    preferredLanguageTags = preferredLanguageTags,
+    supportedLanguageTags = onlineLanguageTags,
+)
 
 internal fun nextUntriedLanguage(
     preferredLanguageTags: List<String>,

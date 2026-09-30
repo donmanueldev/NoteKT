@@ -91,7 +91,11 @@ class VoiceTaskParser {
         val match = TIME.find(text) ?: return null to null
         var hour = match.groupValues[1].toNumber() ?: return null to null
         var minute = match.groupValues[2].toIntOrNull() ?: 0
-        val period = match.groupValues[3].lowercase().replace(".", "")
+        val period = listOf(match.groupValues[3], match.groupValues[5])
+            .filter(String::isNotBlank)
+            .joinToString(" ")
+            .lowercase()
+            .replace(Regex("[.\\s]"), "")
         val fraction = match.groupValues[4].lowercase()
 
         if (fraction.contains("media")) minute = 30
@@ -190,7 +194,10 @@ class VoiceTaskParser {
                 "veintid[oó]s|veintitr[eé]s)" +
                 "(?::(\\d{2}))?\\s*" +
                 "(a\\.?\\s*m\\.?|p\\.?\\s*m\\.?|de\\s+la\\s+ma[ñn]ana|de\\s+la\\s+tarde|" +
-                "de\\s+la\\s+noche)?\\s*(y\\s+(?:media|cuarto))?\\b",
+                "de\\s+la\\s+noche)?\\s*" +
+                "(?:y\\s+(media|cuarto))?\\s*" +
+                "(a\\.?\\s*m\\.?|p\\.?\\s*m\\.?|de\\s+la\\s+ma[ñn]ana|de\\s+la\\s+tarde|" +
+                "de\\s+la\\s+noche)?\\b",
             RegexOption.IGNORE_CASE,
         )
     }

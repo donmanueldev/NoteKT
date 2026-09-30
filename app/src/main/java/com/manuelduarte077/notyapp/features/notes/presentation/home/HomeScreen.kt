@@ -37,6 +37,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,6 +49,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -59,6 +61,8 @@ import com.manuelduarte077.notyapp.features.notes.presentation.home.components.S
 import com.manuelduarte077.notyapp.features.notes.presentation.home.components.TaskItem
 import com.manuelduarte077.notyapp.features.notes.presentation.home.providers.HomeScreenPreviewProvider
 import com.manuelduarte077.notyapp.ui.theme.NoteTheme
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 
 @Composable
 fun HomeScreenRoot(
@@ -68,6 +72,33 @@ fun HomeScreenRoot(
     val state = viewModel.state
     val event = viewModel.events
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner, viewModel) {
+        var visible = false
+        val observer = LifecycleEventObserver { _, lifecycleEvent ->
+            when (lifecycleEvent) {
+                Lifecycle.Event.ON_RESUME -> {
+                    if (!visible) {
+                        visible = true
+                        viewModel.onScreenVisible()
+                    }
+                }
+                Lifecycle.Event.ON_PAUSE,
+                Lifecycle.Event.ON_STOP -> visible = false
+                else -> Unit
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        if (
+            lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED) &&
+            !visible
+        ) {
+            visible = true
+            viewModel.onScreenVisible()
+        }
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     LaunchedEffect(
         true

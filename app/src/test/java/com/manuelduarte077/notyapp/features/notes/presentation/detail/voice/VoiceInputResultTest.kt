@@ -66,4 +66,16 @@ class VoiceInputResultTest {
             ),
         )
     }
+
+    @Test
+    fun `recognition language prefers installed model over online model`() {
+        assertEquals(
+            "es-ES",
+            selectRecognitionLanguage(
+                preferredLanguageTags = listOf("es-NI", "es-ES"),
+                installedLanguageTags = listOf("es-ES"),
+                onlineLanguageTags = listOf("es-NI"),
+            ),
+        )
+    }
 }

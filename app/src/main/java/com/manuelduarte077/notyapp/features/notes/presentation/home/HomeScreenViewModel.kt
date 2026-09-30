@@ -36,8 +36,6 @@ class HomeScreenViewModel @Inject constructor(
     val events = eventChannel.receiveAsFlow()
 
     init {
-        analyticsTracker.logScreenView("home")
-
         state = state.copy(
             date = LocalDate.now().let {
                 DateTimeFormatter.ofPattern("EEEE, MMMM dd yyyy").format(it)
@@ -66,6 +64,10 @@ class HomeScreenViewModel @Inject constructor(
             )
         }.launchIn(viewModelScope)
 
+    }
+
+    fun onScreenVisible() {
+        analyticsTracker.logScreenView("home")
     }
 
 

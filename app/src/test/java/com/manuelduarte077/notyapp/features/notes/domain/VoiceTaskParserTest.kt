@@ -88,4 +88,23 @@ class VoiceTaskParserTest {
         assertNull(result.dueDate)
         assertNull(result.dueTime)
     }
+
+    @Test
+    fun `parses fractional time followed by afternoon period`() {
+        val result = parser.parse(
+            "Llamar a Ana a las seis y media de la tarde",
+            now,
+        )
+
+        assertEquals("Llamar a Ana", result.title)
+        assertEquals(LocalTime.of(18, 30), result.dueTime)
+    }
+
+    @Test
+    fun `parses dotted afternoon meridiem`() {
+        assertEquals(
+            LocalTime.of(18, 0),
+            parser.parse("Llamar a Ana a las 6 p. m.", now).dueTime,
+        )
+    }
 }
