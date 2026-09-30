@@ -84,7 +84,7 @@ internal class AndroidVoiceRecognizer(
     private fun checkRecognitionSupport(recognizer: SpeechRecognizer, session: Session) {
         val fallbackTag = session.preferredLanguageTags.first()
         recognizer.checkRecognitionSupport(
-            recognitionIntent(fallbackTag, session.request.biasingStrings),
+            recognitionIntent(fallbackTag, session.request),
             applicationContext.mainExecutor,
             object : RecognitionSupportCallback {
                 override fun onSupportResult(recognitionSupport: RecognitionSupport) {
@@ -106,7 +106,7 @@ internal class AndroidVoiceRecognizer(
                     if (downloadable != null) {
                         try {
                             recognizer.triggerModelDownload(
-                                recognitionIntent(downloadable, session.request.biasingStrings),
+                                recognitionIntent(downloadable, session.request),
                             )
                             finish(
                                 session.id,
@@ -166,7 +166,7 @@ internal class AndroidVoiceRecognizer(
         recognizer.setRecognitionListener(SessionRecognitionListener(session.id, attempt))
         try {
             recognizer.startListening(
-                recognitionIntent(languageTag, session.request.biasingStrings),
+                recognitionIntent(languageTag, session.request),
             )
         } catch (_: RuntimeException) {
             finish(session.id, attempt, VoiceRecognitionEvent.Failed)
@@ -213,16 +213,24 @@ internal class AndroidVoiceRecognizer(
 
     private fun recognitionIntent(
         languageTag: String,
-        biasingStrings: List<String>,
+        request: VoiceRecognitionRequest,
     ) = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
         putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-        putExtra(RecognizerIntent.EXTRA_LANGUAGE, languageTag)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE && request.enableLanguageSwitch) {
+            putExtra(RecognizerIntent.EXTRA_ENABLE_LANGUAGE_SWITCH, true)
+            putStringArrayListExtra(
+                RecognizerIntent.EXTRA_LANGUAGE_SWITCH_ALLOWED_LANGUAGES,
+                ArrayList(request.preferredLanguageTags),
+            )
+        } else {
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, languageTag)
+        }
         putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
         putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, MAX_VOICE_RESULTS)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             putStringArrayListExtra(
                 RecognizerIntent.EXTRA_BIASING_STRINGS,
-                ArrayList(biasingStrings),
+                ArrayList(request.biasingStrings),
             )
             putExtra(
                 RecognizerIntent.EXTRA_ENABLE_FORMATTING,

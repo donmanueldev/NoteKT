@@ -70,7 +70,12 @@ internal fun rememberTaskVoiceInput(
                     "otros",
                     "hoy",
                     "mañana",
+                    "work",
+                    "shopping",
+                    "today",
+                    "tomorrow",
                 ),
+                enableLanguageSwitch = true,
             ),
         ) { event ->
             when (event) {
@@ -202,8 +207,10 @@ internal fun rememberTaskVoiceInput(
 }
 
 internal fun preferredSpeechLanguageTags(locale: Locale): List<String> = listOf(
+    locale.toLanguageTag(),
     "es-NI",
     "es-US",
     "es-ES",
-    locale.toLanguageTag(),
+    "en-US",
+    "en-GB",
 ).distinct()

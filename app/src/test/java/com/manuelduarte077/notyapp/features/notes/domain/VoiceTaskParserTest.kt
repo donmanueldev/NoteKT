@@ -107,4 +107,28 @@ class VoiceTaskParserTest {
             parser.parse("Llamar a Ana a las 6 p. m.", now).dueTime,
         )
     }
+
+    @Test
+    fun `parses English task with date time and category`() {
+        assertEquals(
+            VoiceTaskDraft(
+                title = "Buy milk",
+                category = Category.SHOPPING,
+                dueDate = LocalDate.of(2026, 9, 23),
+                dueTime = LocalTime.of(18, 30),
+            ),
+            parser.parse(
+                "Remind me to buy milk tomorrow at 6:30 in the afternoon for shopping",
+                now,
+            ),
+        )
+    }
+
+    @Test
+    fun `keeps English dictation when no structured metadata is present`() {
+        assertEquals(
+            "Call my sister",
+            parser.parse("Call my sister", now).title,
+        )
+    }
 }

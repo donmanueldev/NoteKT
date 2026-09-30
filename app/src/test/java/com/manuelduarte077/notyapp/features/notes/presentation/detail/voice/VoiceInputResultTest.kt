@@ -26,7 +26,7 @@ class VoiceInputResultTest {
     @Test
     fun `Spanish locale prioritizes Nicaragua and removes duplicates`() {
         assertEquals(
-            listOf("es-NI", "es-US", "es-ES"),
+            listOf("es-NI", "es-US", "es-ES", "en-US", "en-GB"),
             preferredSpeechLanguageTags(Locale.forLanguageTag("es-NI")),
         )
     }
@@ -34,7 +34,7 @@ class VoiceInputResultTest {
     @Test
     fun `system English remains a fallback after Spanish recognition models`() {
         assertEquals(
-            listOf("es-NI", "es-US", "es-ES", "en-US"),
+            listOf("en-US", "es-NI", "es-US", "es-ES", "en-GB"),
             preferredSpeechLanguageTags(Locale.forLanguageTag("en-US")),
         )
     }
