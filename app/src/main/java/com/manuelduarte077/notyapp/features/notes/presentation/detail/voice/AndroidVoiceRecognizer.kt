@@ -47,17 +47,25 @@ internal class AndroidVoiceRecognizer(
             .ifEmpty { listOf(Locale.getDefault().toLanguageTag()) }
         val session = Session(
             id = ++sessionSequence,
-            request = request,
             preferredLanguageTags = preferredTags,
             listener = listener,
         )
         activeSession = session
 
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                checkRecognitionSupport(recognizer, session)
-            } else {
-                startNextLanguage(recognizer, session)
+            when {
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE &&
+                    request.enableLanguageSwitch -> startLanguage(
+                        recognizer,
+                        session,
+                        preferredTags.first(),
+                        enableLanguageSwitch = true,
+                    )
+
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU ->
+                    checkRecognitionSupport(recognizer, session)
+
+                else -> startNextLanguage(recognizer, session)
             }
         } catch (_: RuntimeException) {
             finish(session.id, session.activeAttempt, VoiceRecognitionEvent.Failed)
@@ -84,7 +92,7 @@ internal class AndroidVoiceRecognizer(
     private fun checkRecognitionSupport(recognizer: SpeechRecognizer, session: Session) {
         val fallbackTag = session.preferredLanguageTags.first()
         recognizer.checkRecognitionSupport(
-            recognitionIntent(fallbackTag, session.request),
+            recognitionIntent(fallbackTag),
             applicationContext.mainExecutor,
             object : RecognitionSupportCallback {
                 override fun onSupportResult(recognitionSupport: RecognitionSupport) {
@@ -106,7 +114,7 @@ internal class AndroidVoiceRecognizer(
                     if (downloadable != null) {
                         try {
                             recognizer.triggerModelDownload(
-                                recognitionIntent(downloadable, session.request),
+                                recognitionIntent(downloadable),
                             )
                             finish(
                                 session.id,
@@ -158,15 +166,18 @@ internal class AndroidVoiceRecognizer(
         recognizer: SpeechRecognizer,
         session: Session,
         languageTag: String,
+        enableLanguageSwitch: Boolean = false,
     ) {
         if (!isCurrentSession(session.id)) return
-        session.attemptedLanguageTags += normalizeLanguageTag(languageTag)
+        if (!enableLanguageSwitch) {
+            session.attemptedLanguageTags += normalizeLanguageTag(languageTag)
+        }
         val attempt = ++session.attemptSequence
         session.activeAttempt = attempt
         recognizer.setRecognitionListener(SessionRecognitionListener(session.id, attempt))
         try {
             recognizer.startListening(
-                recognitionIntent(languageTag, session.request),
+                recognitionIntent(languageTag, enableLanguageSwitch),
             )
         } catch (_: RuntimeException) {
             finish(session.id, attempt, VoiceRecognitionEvent.Failed)
@@ -213,14 +224,13 @@ internal class AndroidVoiceRecognizer(
 
     private fun recognitionIntent(
         languageTag: String,
-        request: VoiceRecognitionRequest,
+        enableLanguageSwitch: Boolean = false,
     ) = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
         putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE && request.enableLanguageSwitch) {
-            putExtra(RecognizerIntent.EXTRA_ENABLE_LANGUAGE_SWITCH, true)
-            putStringArrayListExtra(
-                RecognizerIntent.EXTRA_LANGUAGE_SWITCH_ALLOWED_LANGUAGES,
-                ArrayList(request.preferredLanguageTags),
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE && enableLanguageSwitch) {
+            putExtra(
+                RecognizerIntent.EXTRA_ENABLE_LANGUAGE_SWITCH,
+                RecognizerIntent.LANGUAGE_SWITCH_BALANCED,
             )
         } else {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, languageTag)
@@ -299,7 +309,6 @@ internal class AndroidVoiceRecognizer(
 
     private data class Session(
         val id: Long,
-        val request: VoiceRecognitionRequest,
         val preferredLanguageTags: List<String>,
         val listener: VoiceRecognitionEventListener,
         val attemptedLanguageTags: MutableSet<String> = linkedSetOf(),

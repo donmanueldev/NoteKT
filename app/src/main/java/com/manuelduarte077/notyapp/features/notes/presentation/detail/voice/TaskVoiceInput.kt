@@ -194,11 +194,5 @@ internal fun rememberTaskVoiceInput(
     )
 }
 
-internal fun preferredSpeechLanguageTags(locale: Locale): List<String> = listOf(
-    locale.toLanguageTag(),
-    "es-NI",
-    "es-US",
-    "es-ES",
-    "en-US",
-    "en-GB",
-).distinct()
+internal fun preferredSpeechLanguageTags(locale: Locale): List<String> =
+    listOf(locale.toLanguageTag())

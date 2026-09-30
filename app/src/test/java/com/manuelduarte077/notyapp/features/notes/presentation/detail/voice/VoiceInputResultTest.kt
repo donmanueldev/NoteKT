@@ -7,61 +7,57 @@ import java.util.Locale
 
 class VoiceInputResultTest {
     @Test
-    fun `legacy recognition retries the next preferred Spanish locale`() {
+    fun `recognition retries only configured locales`() {
         assertEquals(
-            "es-US",
+            "fr-FR",
             nextUntriedLanguage(
-                preferredLanguageTags = listOf("es-NI", "es-US", "es-ES"),
-                attemptedLanguageTags = setOf("es-NI"),
+                preferredLanguageTags = listOf("de-DE", "fr-FR"),
+                attemptedLanguageTags = setOf("de-DE"),
             ),
         )
         assertNull(
             nextUntriedLanguage(
-                preferredLanguageTags = listOf("es-NI", "es-US"),
-                attemptedLanguageTags = setOf("es-NI", "es-US"),
+                preferredLanguageTags = listOf("fr-FR"),
+                attemptedLanguageTags = setOf("fr-FR"),
             ),
         )
     }
 
     @Test
-    fun `Spanish locale prioritizes Nicaragua and removes duplicates`() {
+    fun `only the device locale is requested`() {
         assertEquals(
-            listOf("es-NI", "es-US", "es-ES", "en-US", "en-GB"),
+            listOf("es-NI"),
             preferredSpeechLanguageTags(Locale.forLanguageTag("es-NI")),
         )
-    }
-
-    @Test
-    fun `system English is prioritized for an English locale`() {
         assertEquals(
-            listOf("en-US", "es-NI", "es-US", "es-ES", "en-GB"),
-            preferredSpeechLanguageTags(Locale.forLanguageTag("en-US")),
+            listOf("fr-FR"),
+            preferredSpeechLanguageTags(Locale.forLanguageTag("fr-FR")),
         )
     }
 
     @Test
-    fun `language support prefers exact Nicaragua model`() {
+    fun `language support prefers the exact device locale`() {
         assertEquals(
-            "es-NI",
+            "fr-FR",
             selectSupportedLanguage(
-                preferredLanguageTags = listOf("es-NI", "es-US", "es-ES"),
-                supportedLanguageTags = listOf("en-US", "es-US", "es_NI"),
+                preferredLanguageTags = listOf("fr-FR"),
+                supportedLanguageTags = listOf("en-US", "fr-CA", "fr_FR"),
             ),
         )
     }
 
     @Test
-    fun `language support falls back to another Spanish model`() {
+    fun `language support can use another region for the device language`() {
         assertEquals(
-            "es-US",
+            "fr-CA",
             selectSupportedLanguage(
-                preferredLanguageTags = listOf("es-NI", "es-US"),
-                supportedLanguageTags = listOf("en-US", "es-US"),
+                preferredLanguageTags = listOf("fr-FR"),
+                supportedLanguageTags = listOf("en-US", "fr-CA"),
             ),
         )
         assertNull(
             selectSupportedLanguage(
-                preferredLanguageTags = listOf("es-NI"),
+                preferredLanguageTags = listOf("fr-FR"),
                 supportedLanguageTags = listOf("en-US"),
             ),
         )

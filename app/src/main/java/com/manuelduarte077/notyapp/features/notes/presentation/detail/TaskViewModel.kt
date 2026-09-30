@@ -115,18 +115,10 @@ class TaskViewModel @Inject constructor(
                 dueTime = state.dueTime.takeIf { action.dueDate != null },
             )
             is ActionTask.ChangeTaskDueTime -> state = state.copy(dueTime = action.dueTime)
-            is ActionTask.ApplyDictatedTask -> {
-                val title = action.draft.title.trim()
+            is ActionTask.ApplyDictatedTitle -> {
+                val title = action.transcript.trim()
                 if (state.isNewTask && !state.isSaving && title.isNotBlank()) {
                     state.taskName.setTextAndPlaceCursorAtEnd(title)
-                    state.taskDescription.setTextAndPlaceCursorAtEnd(
-                        action.draft.description.orEmpty(),
-                    )
-                    state = state.copy(
-                        category = action.draft.category,
-                        dueDate = action.draft.dueDate,
-                        dueTime = action.draft.dueTime.takeIf { action.draft.dueDate != null },
-                    )
                 }
             }
             ActionTask.SaveTask -> saveTask()

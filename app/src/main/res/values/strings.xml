@@ -29,8 +29,8 @@
     <string name="voice_input_unavailable">Voice input is unavailable on this device. Type your task instead.</string>
     <string name="voice_input_failed">Voice input failed. Try again or type your task.</string>
     <string name="voice_input_permission_denied">Microphone permission is required for voice input.</string>
-    <string name="voice_input_language_unavailable">Spanish speech recognition is unavailable on this device.</string>
-    <string name="voice_input_model_downloading">The Spanish speech model is downloading. Try again when it finishes.</string>
+    <string name="voice_input_language_unavailable">Speech recognition is unavailable for the device language.</string>
+    <string name="voice_input_model_downloading">The speech model is downloading. Try again when it finishes.</string>
     <string name="voice_input_listening">Listening…</string>
     <string name="voice_input_processing">Processing speech…</string>
     <string name="stop_voice_input">Stop voice input</string>

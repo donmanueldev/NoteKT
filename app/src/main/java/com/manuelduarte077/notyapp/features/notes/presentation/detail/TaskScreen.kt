@@ -57,7 +57,6 @@ import androidx.compose.ui.unit.dp
 import com.manuelduarte077.notyapp.features.notes.presentation.detail.providers.TaskScreenStatePreviewProvider
 import com.manuelduarte077.notyapp.R
 import com.manuelduarte077.notyapp.features.notes.domain.Category
-import com.manuelduarte077.notyapp.features.notes.domain.VoiceTaskParser
 import com.manuelduarte077.notyapp.features.notes.presentation.detail.voice.AndroidVoiceRecognizerFactory
 import com.manuelduarte077.notyapp.features.notes.presentation.detail.voice.VoiceRecognitionCandidate
 import com.manuelduarte077.notyapp.features.notes.presentation.detail.voice.VoiceRecognitionState
@@ -80,9 +79,6 @@ internal fun TaskScreenRoot(
     val event = viewModel.event
 
     val context = LocalContext.current
-    val voiceTaskParser = remember(context.resources) {
-        VoiceTaskParser(loadVoiceTaskLexicon(context.resources))
-    }
     var voiceCandidates by remember { mutableStateOf<List<VoiceRecognitionCandidate>>(emptyList()) }
     val voiceInput = rememberTaskVoiceInput(
         recognizerFactory = voiceRecognizerFactory,
@@ -92,7 +88,7 @@ internal fun TaskScreenRoot(
                 voiceCandidates = result.candidates
                 result.candidates.firstOrNull()?.let { candidate ->
                     viewModel.onAction(
-                        ActionTask.ApplyDictatedTask(voiceTaskParser.parse(candidate.text)),
+                        ActionTask.ApplyDictatedTitle(candidate.text),
                     )
                 }
             }
@@ -150,7 +146,7 @@ internal fun TaskScreenRoot(
         onSelectVoiceCandidate = { candidate ->
             voiceCandidates = emptyList()
             viewModel.onAction(
-                ActionTask.ApplyDictatedTask(voiceTaskParser.parse(candidate.text)),
+                ActionTask.ApplyDictatedTitle(candidate.text),
             )
         },
         onAction = { action ->

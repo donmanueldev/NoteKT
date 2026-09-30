@@ -5,7 +5,7 @@ NoteKT es una aplicación moderna de gestión de notas y tareas desarrollada con
 ## Características
 
 - **Gestión de tareas**: Crear, editar, marcar como completadas y eliminar tareas
-- **Tareas por voz**: Dictar el título desde el micrófono de Inicio o del formulario, revisarlo y guardar
+- **Tareas por voz**: Dictar texto libre desde Inicio o el formulario, editarlo y guardar
 - **Categorización**: Organizar tareas por categorías (Trabajo, Personal, Compras, Otros)
 - **Interfaz moderna**: Diseñada con Jetpack Compose siguiendo los principios de Material Design 3
 - **Modo oscuro**: Soporte completo para tema claro y oscuro
@@ -94,25 +94,20 @@ app/
 ### Crear una tarea por voz
 
 Toca el micrófono junto a «+» en Inicio para abrir una tarea nueva y comenzar el dictado.
-El texto reconocido aparece como título: puedes corregirlo, añadir descripción o categoría
-en español o inglés. En Android 14 o posterior el reconocimiento puede cambiar de idioma
-durante el dictado; en versiones anteriores se usa el idioma de reconocimiento configurado
-en el dispositivo.
-y tocar **Guardar**. El micrófono junto al título permite repetir el dictado y reemplazarlo.
-Cancelar o salir sin guardar no crea una tarea.
+El texto reconocido aparece completo como título. Puedes corregirlo, elegir otra transcripción
+o repetir el dictado. La descripción, categoría, fecha y hora se agregan en el formulario;
+el dictado no interpreta comandos ni rellena esos campos. Toca **Guardar** para crear la tarea.
+Cancelar o salir sin guardar no crea nada.
 
 NoteKT utiliza `SpeechRecognizer` dentro de la aplicación y solicita el permiso
-`RECORD_AUDIO` solo al iniciar un dictado. Prioriza español de Nicaragua, consulta los
-modelos disponibles cuando Android lo permite y conserva hasta cinco alternativas con su
-confianza. La pantalla muestra resultados parciales y permite cancelar o escoger otra
-transcripción antes de guardar.
+`RECORD_AUDIO` solo al iniciar un dictado. No envía una lista de frases ni limita los idiomas
+a una lista fija. En Android 14 o posterior solicita cambio automático de idioma; en versiones
+anteriores usa el idioma configurado en el dispositivo. La disponibilidad de idiomas depende
+del servicio de reconocimiento y los modelos instalados. La pantalla muestra resultados
+parciales y permite escoger entre hasta cinco transcripciones antes de guardar.
 
 El audio lo procesa el servicio de reconocimiento instalado y, según el dispositivo, puede
-enviarse a sus servidores; NoteKT no almacena el audio. El texto final se interpreta de forma
-local para extraer título, descripción explícita, categoría, fecha y hora de vencimiento. El
-usuario puede revisar y corregir todos esos campos antes de guardar la tarea.
-El reconocedor no recibe una lista fija de palabras: captura dictado libre para no favorecer
-un idioma o un conjunto cerrado de frases.
+enviarse a sus servidores; NoteKT no almacena el audio.
 
 ## Modelos de datos
 
@@ -124,7 +119,9 @@ data class Task(
     val description: String?,
     val isCompleted: Boolean = false,
     val category: Category? = null,
-    val date: LocalDateTime = LocalDateTime.now()
+    val date: LocalDateTime = LocalDateTime.now(),
+    val dueDate: LocalDate? = null,
+    val dueTime: LocalTime? = null
 )
 ```
 

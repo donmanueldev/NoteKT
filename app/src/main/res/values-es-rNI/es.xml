@@ -30,8 +30,8 @@
     <string name="voice_input_unavailable">El dictado no está disponible en este dispositivo. Escribí tu tarea.</string>
     <string name="voice_input_failed">Falló el dictado. Intentá de nuevo o escribí tu tarea.</string>
     <string name="voice_input_permission_denied">Se necesita permiso para usar el micrófono.</string>
-    <string name="voice_input_language_unavailable">El reconocimiento de español no está disponible en este dispositivo.</string>
-    <string name="voice_input_model_downloading">Se está descargando el modelo de español. Intentá de nuevo cuando termine.</string>
+    <string name="voice_input_language_unavailable">El reconocimiento no está disponible para el idioma configurado en este dispositivo.</string>
+    <string name="voice_input_model_downloading">Se está descargando el modelo de voz. Intentá de nuevo cuando termine.</string>
     <string name="voice_input_listening">Escuchando…</string>
     <string name="voice_input_processing">Procesando lo que dijiste…</string>
     <string name="stop_voice_input">Detener dictado</string>

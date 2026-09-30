@@ -71,12 +71,15 @@ class TaskVoiceInputTest {
     }
 
     @Test
-    fun partialSpeechBecomesReviewableStructuredTaskAndSavesOnce() {
+    fun partialSpeechBecomesEditableTitleAndSavesOnce() {
         val viewModel = createViewModel(startVoiceInput = true)
         showTask(viewModel)
 
         compose.runOnIdle {
-            assertEquals("es-NI", recognizer.requests.single().preferredLanguageTags.first())
+            assertEquals(
+                context.resources.configuration.locales[0].toLanguageTag(),
+                recognizer.requests.single().preferredLanguageTags.single(),
+            )
             recognizer.emit(VoiceRecognitionEvent.PartialResult("comprar leche mañana"))
         }
         compose.onNodeWithText("comprar leche mañana").assertExists()
@@ -92,19 +95,25 @@ class TaskVoiceInputTest {
                     ),
                 ),
             )
-            assertEquals("Comprar leche", viewModel.state.taskName.text.toString())
-            assertEquals(Category.SHOPPING, viewModel.state.category)
-            assertEquals(LocalDate.now().plusDays(1), viewModel.state.dueDate)
-            assertEquals(LocalTime.of(18, 0), viewModel.state.dueTime)
+            assertEquals(
+                "Recuérdame comprar leche mañana a las seis de la tarde categoría compras",
+                viewModel.state.taskName.text.toString(),
+            )
+            assertNull(viewModel.state.category)
+            assertNull(viewModel.state.dueDate)
+            assertNull(viewModel.state.dueTime)
             assertTrue(dataSource.inserted.isEmpty())
         }
 
         compose.onNodeWithText(context.getString(R.string.save)).performClick()
         compose.runOnIdle {
             assertEquals(1, dataSource.inserted.size)
-            assertEquals("Comprar leche", dataSource.inserted.single().title)
-            assertEquals(Category.SHOPPING, dataSource.inserted.single().category)
-            assertEquals(LocalTime.of(18, 0), dataSource.inserted.single().dueTime)
+            assertEquals(
+                "Recuérdame comprar leche mañana a las seis de la tarde categoría compras",
+                dataSource.inserted.single().title,
+            )
+            assertNull(dataSource.inserted.single().category)
+            assertNull(dataSource.inserted.single().dueTime)
             assertEquals(1, backNavigations)
         }
     }
@@ -112,6 +121,7 @@ class TaskVoiceInputTest {
     @Test
     fun alternativesCanReplaceTheBestCandidateBeforeSaving() {
         val viewModel = createViewModel(startVoiceInput = true)
+        compose.runOnIdle { populateDraft(viewModel) }
         showTask(viewModel)
 
         compose.runOnIdle {
@@ -127,24 +137,27 @@ class TaskVoiceInputTest {
                 ),
             )
         }
-        compose.onAllNodes(hasSetTextAction())[0].assertTextEquals("Comprar queso")
+        compose.onAllNodes(hasSetTextAction())[0]
+            .assertTextEquals("Comprar queso mañana categoría compras")
         compose.runOnIdle {
-            assertEquals(Category.SHOPPING, viewModel.state.category)
-            assertEquals(LocalDate.now().plusDays(1), viewModel.state.dueDate)
+            assertEquals(Category.WORK, viewModel.state.category)
+            assertEquals(LocalDate.of(2026, 9, 30), viewModel.state.dueDate)
         }
         compose.onNodeWithText(context.getString(R.string.voice_input_alternatives, 2)).performClick()
         compose.onNodeWithText("Comprar hueso (51%)").performClick()
         compose.onAllNodes(hasSetTextAction())[0].assertTextEquals("Comprar hueso")
         compose.runOnIdle {
-            assertNull(viewModel.state.category)
-            assertNull(viewModel.state.dueDate)
-            assertNull(viewModel.state.dueTime)
+            assertEquals("Detalles pendientes", viewModel.state.taskDescription.text.toString())
+            assertEquals(Category.WORK, viewModel.state.category)
+            assertEquals(LocalDate.of(2026, 9, 30), viewModel.state.dueDate)
+            assertEquals(LocalTime.of(16, 30), viewModel.state.dueTime)
         }
     }
 
     @Test
-    fun secondDictationReplacesStructuredFieldsFromTheFirst() {
+    fun secondDictationReplacesOnlyTheTitle() {
         val viewModel = createViewModel(startVoiceInput = true)
+        compose.runOnIdle { populateDraft(viewModel) }
         showTask(viewModel)
 
         compose.runOnIdle {
@@ -167,9 +180,10 @@ class TaskVoiceInputTest {
                 ),
             )
             assertEquals("Llamar a mamá", viewModel.state.taskName.text.toString())
-            assertNull(viewModel.state.category)
-            assertNull(viewModel.state.dueDate)
-            assertNull(viewModel.state.dueTime)
+            assertEquals("Detalles pendientes", viewModel.state.taskDescription.text.toString())
+            assertEquals(Category.WORK, viewModel.state.category)
+            assertEquals(LocalDate.of(2026, 9, 30), viewModel.state.dueDate)
+            assertEquals(LocalTime.of(16, 30), viewModel.state.dueTime)
         }
     }
 
